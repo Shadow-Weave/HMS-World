@@ -1,44 +1,59 @@
 # hms-world: Evolving World Memory for Multi-Shot Video Generation
 
-[中文](README.zh-CN.md) · [Documentation index](docs/README.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Documentation](docs/README.md)
 
-## Abstract
+**World memory for multi-shot video generation.** hms-world observes generated footage, maintains structured world state, and uses that memory to guide visual reference selection, keyframe prompting, and next-shot replanning.
 
-Multi-shot video generation requires continuity of character identity, object state, and scene relationships across shots. Generated footage, however, may diverge from the actions specified in a screenplay. A predefined storyboard alone provides limited support for carrying these observed changes into subsequent shots.
+[News](#news) · [Highlights](#highlights) · [Overview](#overview) · [Core Codes](#core-codes) · [Quick Start](#quick-start) · [Results](#benchmark-results) · [TODO](#todo)
 
-**hms-world** is a world-memory framework for multi-shot video generation, focusing on how state is **represented, written, updated, and retrieved** during production. It extracts structured updates from generated footage, maintains known state and field-level provenance on a unified timeline, and uses relevant historical visual materials for reference selection, keyframe prompting, and next-shot replanning. Built on [ViMax](https://github.com/HKUDS/ViMax), the system retains character portraits, storyboard planning, camera transitions, and shot production while introducing a serial loop of generation, observation, memory update, and subsequent generation to support cross-shot visual continuity.
+<a id="news"></a>
 
-[News](#news) · [Method](#method) · [Diagrams](docs/diagrams.md) · [Results](#benchmark-results) · [Quick start](#installation) · [TODO](#todo)
+## 🔥 News
 
-## News
+* **`2026.11.05`** 🤗 We release **hms-world**, a world-memory framework for multi-shot video generation, with **CLI, Web, and TUI** workflows, a [three-shot example](examples/serial_demo_three_shot.txt), and [historical benchmark results](#benchmark-results).
+* **`2026.10.29`** ✅ ViMax baseline scoring completed for **4/35 stories (42 shots)**. [Matched-story results and metadata](evals/results/vimax-baseline-partial-20261029.json) are available.
+* **`2026.10.22`** ✅ Historical development-run scoring completed on **35 stories / 437 shots** of **ViMax-Bench**. See the [per-story scores and experimental conditions](evals/results/vimax-bench-20261022.json).
 
-| Date | Update |
-| --- | --- |
-| **2026-11-05** | Initial source release with serial world memory and CLI/Web/TUI workflows. Documentation now includes an English-first overview, dedicated diagrams, and a TODO roadmap. |
-| **2026-10-29** | ViMax baseline scoring recorded for **4/35 stories (42 shots)**. [Subset results](evals/results/vimax-baseline-partial-20261029.json). |
-| **2026-10-22** | Historical development-run scoring completed for **35 stories / 437 shots**. [Scores and experimental conditions](evals/results/vimax-bench-20261022.json). |
+<a id="highlights"></a>
 
-## Motivation and design
+## 🎯 Highlights
 
-Cross-shot continuity involves identity preservation, action transitions, and evolving state. For example, a screenplay may require a character to place a cup on a table, while the generated shot still shows the character holding it. Subsequent production needs the observed state to determine whether the next planned shot remains appropriate. hms-world models narrative intent and visual observations separately, connecting successive shots through continuously updated memory.
+- **Evolving World Memory:** Maintain character, prop, and scene state on a unified Timeline with stable entity IDs.
+- **Observation-Driven Updates:** Extract sparse state changes from actual generated footage and merge them into known state.
+- **Provenance-Guided References:** Connect state fields to historical shots and select relevant visual materials for keyframe generation.
+- **Local Next-Shot Replanning:** Retain or revise the next shot using observed outcomes and camera constraints.
+- **Unified Workflows:** Share serial production across CLI, Web, TUI, and evaluation, with plan review and checkpoint recovery.
 
-| Design | Mechanism |
-| --- | --- |
-| **Unified state representation** | Stable entity IDs for characters, props, and scenes; one Timeline for pending plans and observed state |
-| **Observation-based incremental updates** | Sparse updates extracted from video samples by an Observer; field merging and provenance maintained by the Timeline |
-| **Provenance-guided visual reference selection** | Historical shots located through relevant state fields, combined with identity portraits and native camera references |
-| **Local next-shot replanning** | A Replanner uses known terminal state and actual sampled imagery to retain or replace the next shot plan |
-| **Shared execution and evaluation interfaces** | CLI, Web, TUI, and ViMax-Bench adapters share serial production, plan review, and checkpoint recovery |
+🌟 **Built on ViMax:** hms-world extends [ViMax](https://github.com/HKUDS/ViMax)'s portraits, storyboards, camera transitions, and shot production with a persistent observation–memory–generation loop.
 
-### Video example
+<a id="abstract"></a>
+<a id="overview"></a>
+
+## ✨ Overview
+
+<p align="center">
+  <a href="docs/diagrams.md#generation-loop">
+    <img src="docs/assets/world-memory-loop.svg" width="1000" alt="hms-world: project context, generate, observe, update memory, and replan the next shot">
+  </a>
+</p>
+
+> **TLDR:** hms-world builds world memory from generated footage and carries observed state into subsequent shots through reference selection, keyframe prompts, and local replanning.
+
+[Full-size figure](docs/assets/world-memory-loop.svg) · [System architecture](docs/diagrams.md#system-architecture) · [Continuity documentation](docs/continuity.md)
+
+A screenplay specifies intended actions; the generated video determines what is visible. If a character is still holding a cup after a planned placement, later shots need that observed state to judge whether the next plan remains appropriate. hms-world separates narrative intent from visual observation and connects successive shots through updated memory.
+
+<details>
+<summary><strong>🎬 Video demo (click to expand)</strong></summary>
 
 https://github.com/user-attachments/assets/e0079784-4056-43c4-aa20-bb1d985bc648
 
-## Method
+</details>
 
-[![World-memory loop: project context, generate, observe, update memory, and replan the next shot](docs/assets/world-memory-loop.svg)](docs/diagrams.md#generation-loop)
+<a id="method"></a>
 
-[View full-size SVG](docs/assets/world-memory-loop.svg) · [Diagram guide](docs/diagrams.md#generation-loop)
+<details>
+<summary><strong>Method details: state, observation, retrieval, and replanning (click to expand)</strong></summary>
 
 ### 1. Entity state and a unified timeline
 
@@ -73,28 +88,183 @@ The Replanner receives the previous shot's script, complete merged known state, 
 
 See [continuity state and visual materials](docs/continuity.md) for state models, provenance, selection, and recovery semantics.
 
-## Architecture
+</details>
+
+<a id="core-codes"></a>
+
+## 💥 Core Codes and Supported Backends
+
+The serial production loop is implemented in [`pipelines/serial_demo_pipeline.py`](pipelines/serial_demo_pipeline.py). Its main components are:
+
+| Component | Implementation |
+| --- | --- |
+| Serial production and recovery | [`pipelines/serial_demo_pipeline.py`](pipelines/serial_demo_pipeline.py) |
+| Timeline and state merging | [`continuity/timeline.py`](continuity/timeline.py) |
+| Visual observation | [`agents/shot_observer.py`](agents/shot_observer.py) |
+| Continuity reference selection | [`agents/continuity_image_retriever.py`](agents/continuity_image_retriever.py) |
+| Keyframe prompt construction | [`agents/frame_prompt_writer.py`](agents/frame_prompt_writer.py) |
+| Next-shot replanning | [`agents/shot_replanner.py`](agents/shot_replanner.py) |
+| Interactive runtime | [`agent_runtime/`](agent_runtime) |
+| Benchmark generation and scoring | [`evals/vimax/`](evals/vimax) |
+
+The repository provides ComfyUI [FLUX](tools/image_generator_comfy_flux.py) and [Qwen](tools/image_generator_comfy_qwen.py) image adapters and an [H3 video adapter](tools/video_generator_comfy_h3.py). Conversation and visual understanding use OpenAI-compatible interfaces.
+
+### Default configuration
+
+The current example generation configuration and scoring settings are listed below. Historical generation conditions are documented in the corresponding result files.
+
+| Component | Model / service | Settings |
+| --- | --- | --- |
+| Conversation, planning, and visual understanding | Qwen3-VL-30B-A3B | temperature 0.7, top_p 0.8, max_tokens 8192 |
+| Image generation | ComfyUI FLUX.2 klein 9B Base | 50 steps, CFG 4.0 |
+| Video generation | ComfyUI H3 | 1280×720, 5 seconds, first-frame or first/last-frame conditioning |
+| Consistency scoring | ViCLIP-L-14 / InternVid-10M-FLT | 8 frames, 224×224, float32 |
+
+Visual style is task-specific; the reported runs used `realistic live action`. Configure service endpoints and the H3 workflow path in the [serial example configuration](configs/serial_demo_local_h3.example.yaml).
+
+<a id="architecture"></a>
+
+<details>
+<summary><strong>Architecture, outputs, and checkpoint recovery (click to expand)</strong></summary>
 
 The system comprises a Python production core, Web/TUI interaction layers, and file-based checkpoints. All entry points share serial production: each shot completes generation, observation, and state commit before the next shot proceeds.
 
 [View the system architecture diagram →](docs/diagrams.md#system-architecture)
 
-| Module | Responsibility |
-| --- | --- |
-| [`agent_runtime/`](agent_runtime) | Conversation, tool calls, context compaction, sessions, and production adapters |
-| [`pipelines/serial_demo_pipeline.py`](pipelines/serial_demo_pipeline.py) | Serial execution, observation, state commits, next-shot replanning, and recovery |
-| [`pipelines/script2video_pipeline.py`](pipelines/script2video_pipeline.py), [`production/`](production) | Portraits, shot decomposition, camera transitions, keyframes, shot production, and assembly |
-| [`continuity/`](continuity) | State models, Timeline, field provenance, image records, and checkpoint validation |
-| [`agents/`](agents) | Entity extraction, material selection, prompting, observation, and replanning |
-| [`tools/`](tools) | ComfyUI FLUX/Qwen image and H3 video adapters |
-| [`web/`](web), [`ui/`](ui) | Browser and terminal interfaces |
-| [`evals/`](evals), [`tests/`](tests) | Benchmark adaptation, scoring, and offline tests |
-
 The Web service and TUI exchange JSONL events with a Python Agent subprocess; Web forwards progress to the browser through SSE. Conversation and visual understanding use OpenAI-compatible model interfaces, with generation services accessed through loopback endpoints.
 
 Each run saves entity registrations, `continuity/timeline.json`, image records, per-shot media, and sample manifests. Recovery validates checkpoints against actual files before continuing. Interactive workflows support text-plan review before rendering; revisions create a new session while preserving the original plan and media. See [serial generation architecture](docs/architecture.md) for outputs and recovery details.
 
-## Benchmark results
+</details>
+
+<a id="installation"></a>
+<a id="preparation"></a>
+
+## 🛠 Preparation
+
+Requirements: **Python 3.12+**, **uv**, and **FFmpeg**. Web/TUI additionally require Node.js and npm; Node.js 22 is recommended.
+
+**1. Clone the repository and install Python dependencies.**
+
+```sh
+git clone https://github.com/Shadow-Weave/HMS-World.git hms-world
+cd hms-world
+uv sync --locked --python 3.12
+```
+
+Run all subsequent commands from the repository root.
+
+**2. Configure local inference services.**
+
+```sh
+cp configs/serial_demo_local_h3.example.yaml configs/serial_demo_local_h3.yaml
+```
+
+Deploy a vision-capable OpenAI-compatible model service, a ComfyUI image service, and a ComfyUI H3 video service separately. Update the configuration for your deployment:
+
+| Field | Purpose |
+| --- | --- |
+| `chat_model.init_args` | Vision-capable model name, endpoint, and credentials |
+| `image_generator.init_args.base_url` | ComfyUI image endpoint; the example uses FLUX.2 klein |
+| `video_generator.init_args.base_url` | ComfyUI H3 video endpoint |
+| `video_generator.init_args.workflow_path` | Actual local path to the H3 API workflow JSON |
+
+> **💡 Configuration:** Keep `local_only: true` and use loopback endpoints. Remote services can be accessed through SSH forwarding. Replace `/path/to/workflow-api.json` before running.
+
+**3. Prepare the interactive configuration (for Web/TUI).**
+
+```sh
+cp configs/agent.example.yaml configs/agent.local.yaml
+```
+
+Set `serial.config` to the same serial YAML, or use `HMS_WORLD_SERIAL_CONFIG`. Conversation defaults to its `chat_model`; optional `llm` settings override only the conversation model. Image, video, and continuity components use the serial configuration.
+
+<a id="quick-start"></a>
+
+## 🎬 Quick Start
+
+### Serial three-shot generation
+
+```sh
+.venv/bin/python main_serial_demo.py \
+  --config configs/serial_demo_local_h3.yaml \
+  --script-file examples/serial_demo_three_shot.txt \
+  --user-requirement-file examples/serial_demo_three_shot_requirements.txt \
+  --style "3D CGI animation" \
+  --output .working_dir/serial_demo
+```
+
+Outputs are saved under `.working_dir/serial_demo/`, with the Timeline checkpoint at `continuity/timeline.json`. A successful run prints the assembled video's path.
+
+<details>
+<summary><strong>Resume an existing production run (click to expand)</strong></summary>
+
+Use the original configuration, style, and output directory. Add `--resume` and omit script and requirements inputs.
+
+```sh
+.venv/bin/python main_serial_demo.py \
+  --config configs/serial_demo_local_h3.yaml \
+  --style "3D CGI animation" \
+  --resume \
+  --output .working_dir/serial_demo
+```
+
+</details>
+
+### Web workspace
+
+```sh
+npm --prefix web ci
+./hms-world web
+```
+
+Open `http://127.0.0.1:4173`. The interface supports sessions, uploads, shot and media previews, rendering progress, and serial configuration. See the [Web guide](web/README.md) for build and server options.
+
+### Terminal interface
+
+```sh
+npm --prefix ui ci
+./hms-world tui
+```
+
+<details>
+<summary><strong>Interactive planning and session commands (click to expand)</strong></summary>
+
+Planning saves reviewable text and a Timeline before media generation. Rendering resumes from that Timeline under `.working_dir/<session_id>/serial/`. Revisions create a new session and preserve the original plan and media.
+
+```sh
+# Create a session
+./hms-world tui new
+# Resume a specific session
+./hms-world tui resume <session_id>
+```
+
+Legacy Idea/Novel/Script sessions remain viewable; start a new serial session with the approved story text to render them again. Project environment variables use the `HMS_WORLD_*` prefix.
+
+</details>
+
+<a id="evaluation"></a>
+
+## 🚀 Evaluation
+
+Inspect the bundled **ViMax-Bench** dataset without calling model providers:
+
+```sh
+.venv/bin/python evals/vimax/runner.py --list
+.venv/bin/python evals/vimax/runner.py 29 --validate-only
+```
+
+After configuring the generation services, run a benchmark story through the shared serial pipeline:
+
+```sh
+.venv/bin/python evals/vimax/runner.py 29 --execute
+```
+
+See the [evaluation guide](evals/README.md) for batch generation, resume, and scoring. ViCLIP scoring requires a separately prepared model and runtime. Development checks are listed in the [development guide](docs/development.md).
+
+<a id="benchmark-results"></a>
+
+## 📊 Benchmark Results
 
 ### Evaluation protocol
 
@@ -147,115 +317,9 @@ The table compares **the same four stories**, using hms-world outputs from the h
 
 The two sets of outputs come from separate historical runs with differences in generation and review conditions. Findings are limited to the completed subset. A full 35-story baseline under matched conditions, single-variable ablations, and repeated-seed confidence intervals have not been reported. The [partial baseline export](evals/results/vimax-baseline-partial-20261029.json) provides complete IC, CC, GC, and upstream provenance.
 
-### Current model configuration
+<a id="todo"></a>
 
-The current example generation configuration and scoring settings are listed below. Historical generation conditions are documented in the corresponding result files.
-
-| Component | Model / service | Settings |
-| --- | --- | --- |
-| Conversation, planning, and visual understanding | Qwen3-VL-30B-A3B | temperature 0.7, top_p 0.8, max_tokens 8192 |
-| Image generation | ComfyUI FLUX.2 klein 9B Base | 50 steps, CFG 4.0 |
-| Video generation | ComfyUI H3 | 1280×720, 5 seconds, first-frame or first/last-frame conditioning |
-| Consistency scoring | ViCLIP-L-14 / InternVid-10M-FLT | 8 frames, 224×224, float32 |
-
-Visual style is task-specific; the reported runs used `realistic live action`. Configure service endpoints and the H3 workflow path in the [serial example configuration](configs/serial_demo_local_h3.example.yaml).
-
-## Installation
-
-Requirements are Python 3.12+, uv, and FFmpeg. Web/TUI additionally require Node.js and npm; Node.js 22 is recommended.
-
-```sh
-git clone https://github.com/Shadow-Weave/HMS-World.git hms-world
-cd hms-world
-uv sync --locked --python 3.12
-```
-
-Run subsequent commands from the repository root. Use `./hms-world` for interactive interfaces; project environment variables use the `HMS_WORLD_*` prefix.
-
-## Run the serial three-shot example
-
-```sh
-cp configs/serial_demo_local_h3.example.yaml configs/serial_demo_local_h3.yaml
-```
-
-Configure a vision-capable OpenAI-compatible model service, a ComfyUI image service, and a ComfyUI H3 video service. Replace the placeholder `video_generator.init_args.workflow_path` with your H3 API workflow JSON path. The example uses FLUX.2 klein for images. Deploy model services separately, either locally or through SSH forwarding to loopback endpoints.
-
-Keep `local_only: true` and use loopback endpoints.
-
-```sh
-.venv/bin/python main_serial_demo.py \
-  --config configs/serial_demo_local_h3.yaml \
-  --script-file examples/serial_demo_three_shot.txt \
-  --user-requirement-file examples/serial_demo_three_shot_requirements.txt \
-  --style "3D CGI animation" \
-  --output .working_dir/serial_demo
-```
-
-To resume, use the original configuration, style, and output directory, add `--resume`, and omit the script and requirements arguments. The timeline checkpoint is stored at `.working_dir/serial_demo/continuity/timeline.json`; successful runs print the assembled video's path.
-
-```sh
-.venv/bin/python main_serial_demo.py \
-  --config configs/serial_demo_local_h3.yaml \
-  --style "3D CGI animation" \
-  --resume \
-  --output .working_dir/serial_demo
-```
-
-## Web and terminal interfaces
-
-Web/TUI use the same serial plan, observation and replanning loop as the CLI. They accept story ideas or screenplay text.
-
-```sh
-cp configs/agent.example.yaml configs/agent.local.yaml
-```
-
-Prepare the serial YAML above first. Set `serial.config` to that YAML, or use `HMS_WORLD_SERIAL_CONFIG`. Conversation uses its `chat_model` by default; optional `llm` settings override only the conversation model. Image, video and continuity roles all use the serial configuration.
-
-Planning saves reviewable text and a Timeline before media generation. Rendering resumes from that Timeline under `.working_dir/<session_id>/serial/`. Revisions create a new session and preserve the original plan and media. Legacy Idea/Novel/Script sessions remain viewable; start a new serial session with the approved story text to render them again.
-
-For Web, install its dependencies and start the server:
-
-```sh
-npm --prefix web ci
-./hms-world web
-```
-
-Open `http://127.0.0.1:4173`; see the [Web guide](web/README.md) for build and server options.
-
-For TUI:
-
-```sh
-npm --prefix ui ci
-./hms-world tui
-# Create a session
-./hms-world tui new
-# Resume a specific session
-./hms-world tui resume <session_id>
-```
-
-## Validation and evaluation
-
-Inspect the bundled benchmark data without calling model providers:
-
-```sh
-.venv/bin/python evals/vimax/runner.py --list
-.venv/bin/python evals/vimax/runner.py 29 --validate-only
-```
-
-See the [evaluation guide](evals/README.md) for generation, resume, and scoring. ViCLIP scoring requires a separately prepared model and runtime.
-
-Select development checks according to the scope of a change:
-
-```sh
-.venv/bin/python -m pytest -q
-npm --prefix web test
-npm --prefix web run build
-npm --prefix ui test
-```
-
-See [development and validation](docs/development.md) for additional checks and dependencies. Shared `.gitignore` rules cover local configuration, credentials, dependency directories, and `.working_dir/` outputs; use the ignored local configuration filenames shown above.
-
-## TODO
+## 📋 TODO
 
 Completed capabilities and open research directions are tracked below. Unchecked items describe planned work.
 
@@ -269,7 +333,9 @@ Completed capabilities and open research directions are tracked below. Unchecked
 - [ ] Extend historical retrieval and indexing for longer narratives.
 - [ ] Investigate automatic retakes and replanning across multiple shots.
 
-## Limitations
+<a id="limitations"></a>
+
+## 📝 Limitations
 
 - **Observation reliability:** The Observer may misinterpret footage, and sparse sampling may miss brief changes. Field provenance supports traceability; state accuracy still depends on visual observation.
 - **Generation control:** References and structured state do not guarantee adherence to constraints. Duplicate characters, incorrect spatial relationships, and interference from historical compositions remain possible.
@@ -277,8 +343,16 @@ Completed capabilities and open research directions are tracked below. Unchecked
 - **Planning scope:** The Replanner affects only the next shot. Automatic retakes and multi-shot propagation are not implemented.
 - **Experimental coverage:** Development interventions, a partial baseline, and the absence of repeated trials limit attribution and generalization. Further evaluation requires complete matched conditions and separate measures of action, state, and narrative quality.
 
-## Acknowledgments and license
+<a id="acknowledgments"></a>
+
+## 👍 Acknowledgments
 
 hms-world builds on [HKUDS/ViMax](https://github.com/HKUDS/ViMax), retaining its character portraits, storyboards, camera transitions, and shot production with corresponding upstream attribution. The project's main extensions are serial visual observation, world-state memory, historical material selection, and next-shot replanning.
 
-The code is released under the [MIT License](LICENSE), preserving the original license notice. We acknowledge the upstream project and the open-source models and tools used in this system.
+We acknowledge the upstream project and the open-source models and tools used in this system.
+
+<a id="license"></a>
+
+## 📄 License
+
+The code is released under the [MIT License](LICENSE), preserving the original license notice.

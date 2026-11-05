@@ -1,44 +1,58 @@
 # hms-world：面向多镜头视频生成的可更新世界记忆
 
-[English](README.md) · [文档索引](docs/README.md)
+[English](README.md) · [简体中文](README.zh-CN.md) · [文档索引](docs/README.md)
 
-## 摘要
+**面向多镜头视频生成的世界记忆框架。** hms-world 从实际生成的视频中观察状态变化，维护结构化世界记忆，并将记忆用于后续镜头的参考图选择、关键帧提示词构建与下一镜重规划。
 
-多镜头视频生成需要在镜头切换过程中维持人物身份、物体状态与场景关系的连续性。然而，剧本中的预期动作与生成视频中的实际表现可能存在偏差，仅依赖预设分镜难以将这些变化传递至后续镜头。
+[News](#news) · [Highlights](#highlights) · [Overview](#overview) · [核心代码](#core-codes) · [快速开始](#quick-start) · [实验结果](#benchmark-结果) · [TODO](#todo)
 
-**hms-world** 是一个面向多镜头视频生成的世界记忆（world memory）框架，研究生成过程中状态的**表示、写入、更新与读取**。系统从实际生成的视频中提取结构化状态更新，在统一时间轴上维护已知状态及其字段来源，并将相关历史视觉材料用于后续镜头的参考图选择、关键帧提示词构建与下一镜重规划。项目基于 [ViMax](https://github.com/HKUDS/ViMax) 的角色图、分镜、机位转场和单镜制作能力，构建“生成—观察—记忆更新—后续生成”的串行闭环，以支持跨镜头视觉连续性。
+<a id="news"></a>
 
-[新闻](#新闻) · [方法概述](#方法概述) · [流程图](docs/diagrams.md) · [实验结果](#benchmark-结果) · [安装运行](#安装) · [TODO](#todo)
+## 🔥 News
 
-## 新闻
+* **`2026.11.05`** 🤗 我们发布 **hms-world**，提供面向多镜头视频生成的世界记忆框架、**CLI / Web / TUI** 工作流、[三镜示例](examples/serial_demo_three_shot.txt)及[历史评测结果](#benchmark-结果)。
+* **`2026.10.29`** ✅ 完成 ViMax baseline 已运行子集的评分，覆盖 **4/35 个故事、42 个镜头**。[同案例分数与元数据](evals/results/vimax-baseline-partial-20261029.json)已提供。
+* **`2026.10.22`** ✅ 完成 **ViMax-Bench** 历史开发批次评分，覆盖 **35 个故事、437 个镜头**。详见[逐故事分数与实验条件](evals/results/vimax-bench-20261022.json)。
 
-| 日期 | 进展 |
-| --- | --- |
-| **2026-11-05** | 首次发布项目源码，提供串行世界记忆与 CLI/Web/TUI 工作流；文档新增英文默认首页、独立流程图及 TODO 路线图。 |
-| **2026-10-29** | 记录 ViMax baseline 已完成的 **4/35 个故事、42 个镜头**的评分。[子集结果](evals/results/vimax-baseline-partial-20261029.json)。 |
-| **2026-10-22** | 完成 **35 个故事、437 个镜头**的历史开发批次评分。[分数与实验条件](evals/results/vimax-bench-20261022.json)。 |
+<a id="highlights"></a>
 
-## 研究动机与主要设计
+## 🎯 Highlights
 
-跨镜头连续性同时涉及身份保持、动作衔接与状态演化。例如，剧本要求人物在上一镜将杯子放到桌面，但生成结果仍显示人物持杯；后续镜头需要依据观察到的状态判断原计划是否仍然适用。因此，本项目将剧本目标与视觉观察分别建模，通过持续更新的记忆连接相邻镜头的制作过程。
+- **可更新的世界记忆：** 为人物、道具和场景分配稳定实体 ID，在统一 Timeline 上维护已知状态。
+- **基于实际画面的状态更新：** 从生成视频中提取稀疏状态变化，逐字段合并至已有记忆。
+- **来源驱动的参考材料选择：** 将状态字段关联到历史镜头，为关键帧生成选择相关视觉材料。
+- **下一镜局部重规划：** 结合观察结果与机位约束，保留或修订下一镜方案。
+- **统一的制作入口：** CLI、Web、TUI 与评测共享串行生产流程，支持计划审阅和检查点恢复。
 
-| 设计 | 实现机制 |
-| --- | --- |
-| **统一的状态表示** | 为人物、道具和场景分配稳定实体 ID，以单一 Timeline 管理待执行计划与已观察状态 |
-| **基于观察的增量更新** | Observer 从实际视频采样中提取稀疏状态更新；Timeline 负责字段合并与来源追踪 |
-| **来源驱动的视觉材料选择** | 根据相关状态字段的来源定位历史镜头，结合身份图与原生机位参考构建生成上下文 |
-| **面向下一镜的局部重规划** | Replanner 结合已知终态和实际采样图，决定保留或替换下一镜计划 |
-| **共享执行与评测接口** | CLI、Web、TUI 和 ViMax-Bench 适配器共用串行制作流程，支持计划审阅与检查点恢复 |
+🌟 **基于 ViMax 扩展：** hms-world 沿用 [ViMax](https://github.com/HKUDS/ViMax) 的角色图、分镜、机位转场与单镜制作能力，加入持续更新的“观察—记忆—生成”闭环。
 
-### 视频示例
+<a id="overview"></a>
+
+## ✨ Overview
+
+<p align="center">
+  <a href="docs/diagrams.md#generation-loop">
+    <img src="docs/assets/world-memory-loop.svg" width="1000" alt="hms-world 世界记忆闭环：状态投影、生成、观察、记忆更新与下一镜重规划">
+  </a>
+</p>
+
+> **TLDR：** hms-world 从生成画面中构建世界记忆，通过参考图选择、关键帧提示词与局部重规划，将观察到的状态传递至后续镜头。
+
+[查看完整图示](docs/assets/world-memory-loop.svg) · [系统架构图](docs/diagrams.md#system-architecture) · [连续性说明](docs/continuity.md)
+
+剧本描述预期动作，生成视频反映实际可见结果。例如，剧本要求人物将杯子放到桌上，实际画面却仍显示人物持杯；后续制作需要依据这一状态判断原计划是否适用。hms-world 将叙事目标与视觉观察分别建模，通过持续更新的记忆连接相邻镜头。
+
+<details>
+<summary><strong>🎬 视频示例（点击展开）</strong></summary>
 
 https://github.com/user-attachments/assets/e0079784-4056-43c4-aa20-bb1d985bc648
 
-## 方法概述
+</details>
 
-[![世界记忆闭环：状态投影、生成、观察、记忆更新与下一镜重规划](docs/assets/world-memory-loop.svg)](docs/diagrams.md#generation-loop)
+<a id="method"></a>
 
-[查看完整 SVG](docs/assets/world-memory-loop.svg) · [流程图说明](docs/diagrams.md#generation-loop)
+<details>
+<summary><strong>方法细节：状态、观察、检索与重规划（点击展开）</strong></summary>
 
 ### 1. 实体状态表示与统一时间轴
 
@@ -75,28 +89,184 @@ Replanner 接收上一镜剧本、合并后的完整已知状态、最后一张�
 
 状态模型、字段来源、材料选择及恢复规则详见[连续性状态与视觉材料](docs/continuity.md)。
 
-## 系统架构
+</details>
+
+<a id="core-codes"></a>
+
+## 💥 核心代码与支持的后端
+
+串行制作闭环的核心实现在 [`pipelines/serial_demo_pipeline.py`](pipelines/serial_demo_pipeline.py)，主要组件如下：
+
+| 组件 | 代码位置 |
+| --- | --- |
+| 串行制作与恢复 | [`pipelines/serial_demo_pipeline.py`](pipelines/serial_demo_pipeline.py) |
+| Timeline 与状态合并 | [`continuity/timeline.py`](continuity/timeline.py) |
+| 视觉观察 | [`agents/shot_observer.py`](agents/shot_observer.py) |
+| 连续性参考图选择 | [`agents/continuity_image_retriever.py`](agents/continuity_image_retriever.py) |
+| 关键帧提示词构建 | [`agents/frame_prompt_writer.py`](agents/frame_prompt_writer.py) |
+| 下一镜重规划 | [`agents/shot_replanner.py`](agents/shot_replanner.py) |
+| 交互运行时 | [`agent_runtime/`](agent_runtime) |
+| 评测生成与评分 | [`evals/vimax/`](evals/vimax) |
+
+仓库提供 ComfyUI [FLUX](tools/image_generator_comfy_flux.py) 与 [Qwen](tools/image_generator_comfy_qwen.py) 图像适配器，以及 [H3 视频适配器](tools/video_generator_comfy_h3.py)。对话和视觉理解使用 OpenAI 兼容接口。
+
+### 默认配置
+
+当前示例配置与评分设置如下。历史批次的生成条件以对应结果文件为准。
+
+| 组件 | 模型 / 服务 | 参数 |
+| --- | --- | --- |
+| 对话、规划与视觉理解 | Qwen3-VL-30B-A3B | temperature 0.7，top_p 0.8，max_tokens 8192 |
+| 图像生成 | ComfyUI FLUX.2 klein 9B Base | 50 steps，CFG 4.0 |
+| 视频生成 | ComfyUI H3 | 1280×720，5 秒，首帧 / 首尾帧条件 |
+| 一致性评分 | ViCLIP-L-14 / InternVid-10M-FLT | 8 帧，224×224，float32 |
+
+生成风格由任务指定，上述评测批次使用 `realistic live action`。服务地址与 H3 工作流路径通过[串行示例配置](configs/serial_demo_local_h3.example.yaml)设置。
+
+<a id="architecture"></a>
+
+<details>
+<summary><strong>系统架构、制作产物与检查点恢复（点击展开）</strong></summary>
 
 系统由 Python 生产核心、Web/TUI 交互层及文件检查点组成。各入口共享串行制作流程，每镜完成生成、观察与状态提交后，再推进下一镜。
 
 [查看完整系统架构图 →](docs/diagrams.md#system-architecture)
 
-| 模块 | 职责 |
-| --- | --- |
-| [`agent_runtime/`](agent_runtime) | 对话、工具调用、上下文压缩、会话与制作请求适配 |
-| [`pipelines/serial_demo_pipeline.py`](pipelines/serial_demo_pipeline.py) | 串行执行、观察、状态提交、下一镜调整和恢复 |
-| [`pipelines/script2video_pipeline.py`](pipelines/script2video_pipeline.py)、[`production/`](production) | 角色图、分镜拆解、机位转场、关键帧、单镜视频与合成 |
-| [`continuity/`](continuity) | 状态模型、Timeline、字段来源、图片记录与检查点校验 |
-| [`agents/`](agents) | 实体提取、材料选择、提示词构建、观察与重规划组件 |
-| [`tools/`](tools) | ComfyUI FLUX/Qwen 图像、H3 视频适配器 |
-| [`web/`](web)、[`ui/`](ui) | 浏览器与终端交互界面 |
-| [`evals/`](evals)、[`tests/`](tests) | 评测适配、评分与离线测试 |
-
 Web 的 Node 服务和 TUI 通过子进程与 Python Agent 交换 JSONL 事件，Web 通过 SSE 向浏览器传递进度。对话与视觉理解采用 OpenAI 兼容模型接口，生成服务通过本地回环地址接入。
 
 每次制作保存实体登记、`continuity/timeline.json`、图片记录、逐镜媒体和采样清单。恢复时校验检查点与实际文件，再继续尚未完成的制作。交互入口支持先审阅文本计划、再按请求渲染；修订计划会创建新会话并保留原计划与媒体。产物目录与恢复机制见[串行生成架构](docs/architecture.md)。
 
-## Benchmark 结果
+</details>
+
+<a id="installation"></a>
+<a id="preparation"></a>
+
+## 🛠 环境准备
+
+需要 **Python 3.12+**、**uv** 和 **FFmpeg**。使用 Web/TUI 还需 Node.js 与 npm，建议使用 Node.js 22。
+
+**1. 克隆仓库并安装 Python 依赖。**
+
+```sh
+git clone https://github.com/Shadow-Weave/HMS-World.git hms-world
+cd hms-world
+uv sync --locked --python 3.12
+```
+
+后续命令均从仓库根目录执行。
+
+**2. 配置本地推理服务。**
+
+```sh
+cp configs/serial_demo_local_h3.example.yaml configs/serial_demo_local_h3.yaml
+```
+
+单独部署支持图像输入的 OpenAI 兼容模型服务、ComfyUI 图像服务与 ComfyUI H3 视频服务，并按实际部署修改配置：
+
+| 配置项 | 用途 |
+| --- | --- |
+| `chat_model.init_args` | 支持图像输入的模型名称、地址与认证信息 |
+| `image_generator.init_args.base_url` | ComfyUI 图像服务地址；示例使用 FLUX.2 klein |
+| `video_generator.init_args.base_url` | ComfyUI H3 视频服务地址 |
+| `video_generator.init_args.workflow_path` | 本机 H3 API 工作流 JSON 的实际路径 |
+
+> **💡 配置说明：** 保留 `local_only: true` 并使用回环地址。远程服务可通过 SSH 转发接入。运行前请替换 `/path/to/workflow-api.json` 占位路径。
+
+**3. 准备交互配置（用于 Web/TUI）。**
+
+```sh
+cp configs/agent.example.yaml configs/agent.local.yaml
+```
+
+将 `serial.config` 指向同一份串行 YAML，或用 `HMS_WORLD_SERIAL_CONFIG` 指定。对话默认复用其中的 `chat_model`；可选 `llm` 设置只覆盖对话模型。图像、视频和连续性组件使用串行配置。
+
+<a id="quick-start"></a>
+
+## 🎬 快速开始
+
+### 串行三镜生成
+
+```sh
+.venv/bin/python main_serial_demo.py \
+  --config configs/serial_demo_local_h3.yaml \
+  --script-file examples/serial_demo_three_shot.txt \
+  --user-requirement-file examples/serial_demo_three_shot_requirements.txt \
+  --style "3D CGI animation" \
+  --output .working_dir/serial_demo
+```
+
+产物保存在 `.working_dir/serial_demo/`，Timeline 检查点位于 `continuity/timeline.json`。成功结束时输出合成视频路径。
+
+<details>
+<summary><strong>恢复已有制作任务（点击展开）</strong></summary>
+
+使用原配置、风格与输出目录，增加 `--resume`，不再传入剧本和制作要求。
+
+```sh
+.venv/bin/python main_serial_demo.py \
+  --config configs/serial_demo_local_h3.yaml \
+  --style "3D CGI animation" \
+  --resume \
+  --output .working_dir/serial_demo
+```
+
+</details>
+
+### Web 工作区
+
+```sh
+npm --prefix web ci
+./hms-world web
+```
+
+访问 `http://127.0.0.1:4173`。界面支持项目会话、文件上传、分镜与媒体预览、渲染进度和串行配置；构建与服务选项见 [Web 使用说明](web/README.md)。
+
+### 终端界面
+
+```sh
+npm --prefix ui ci
+./hms-world tui
+```
+
+<details>
+<summary><strong>交互计划与会话命令（点击展开）</strong></summary>
+
+计划阶段保存可审阅文本和 Timeline；渲染阶段从 `.working_dir/<session_id>/serial/` 的时间轴恢复。修订会创建新会话并保留原计划与媒体。
+
+```sh
+# 新建会话
+./hms-world tui new
+# 恢复指定会话
+./hms-world tui resume <session_id>
+```
+
+旧 Idea/Novel/Script 会话仍可查看；重新制作时请新建串行会话并提供确认后的故事文本。项目环境变量统一使用 `HMS_WORLD_*` 前缀。
+
+</details>
+
+<a id="evaluation"></a>
+
+## 🚀 评测运行
+
+无需调用模型即可检查内置 **ViMax-Bench** 数据：
+
+```sh
+.venv/bin/python evals/vimax/runner.py --list
+.venv/bin/python evals/vimax/runner.py 29 --validate-only
+```
+
+生成服务配置完成后，可通过共享串行流程运行一个评测故事：
+
+```sh
+.venv/bin/python evals/vimax/runner.py 29 --execute
+```
+
+批量生成、续跑与评分方式见[评测说明](evals/README.md)。ViCLIP 评分需单独准备模型与运行环境。开发检查命令见[开发指南](docs/development.md)。
+
+<a id="benchmark-结果"></a>
+<a id="benchmark-results"></a>
+
+## 📊 Benchmark 结果
 
 ### 评测协议
 
@@ -149,130 +319,9 @@ Baseline 使用 ViMax 原生规划与制作流程（上游版本 `fd4b72e`），
 
 两组结果来自各自的历史批次，生成与审阅条件存在差异；该子集比较的结论范围限于已完成案例。完整 35 故事的同条件 baseline、单变量消融及重复随机种子的置信区间尚未报告。[Baseline 逐故事分数与对照元数据](evals/results/vimax-baseline-partial-20261029.json)提供完整 IC、CC、GC 及上游版本。
 
-### 当前模型配置
+<a id="todo"></a>
 
-当前示例配置与评分设置如下。历史批次的生成条件以对应结果文件为准。
-
-| 组件 | 模型 / 服务 | 参数 |
-| --- | --- | --- |
-| 对话、规划与视觉理解 | Qwen3-VL-30B-A3B | temperature 0.7，top_p 0.8，max_tokens 8192 |
-| 图像生成 | ComfyUI FLUX.2 klein 9B Base | 50 steps，CFG 4.0 |
-| 视频生成 | ComfyUI H3 | 1280×720，5 秒，首帧 / 首尾帧条件 |
-| 一致性评分 | ViCLIP-L-14 / InternVid-10M-FLT | 8 帧，224×224，float32 |
-
-生成风格由任务指定，上述评测批次使用 `realistic live action`。服务地址与 H3 工作流路径通过[串行示例配置](configs/serial_demo_local_h3.example.yaml)设置。
-
-## 安装
-
-运行环境需要 Python 3.12+、uv 和 FFmpeg；使用 Web/TUI 还需 Node.js 与 npm，建议使用 Node.js 22。
-
-```sh
-git clone https://github.com/Shadow-Weave/HMS-World.git hms-world
-cd hms-world
-uv sync --locked --python 3.12
-```
-
-下文命令均从仓库根目录执行。使用 `./hms-world` 启动交互界面；环境变量统一使用 `HMS_WORLD_*` 前缀。
-
-## 运行串行三镜示例
-
-串行示例依赖支持图像输入的 OpenAI 兼容模型服务、ComfyUI 图像服务与 ComfyUI H3 视频服务。模型服务需单独部署，可运行于本机，或通过 SSH 转发至本机回环地址。
-
-先复制配置：
-
-```sh
-cp configs/serial_demo_local_h3.example.yaml configs/serial_demo_local_h3.yaml
-```
-
-按自己的部署修改以下字段：
-
-| 配置项 | 用途 |
-| --- | --- |
-| `chat_model.init_args` | 支持图像输入的模型名称、地址与认证信息 |
-| `image_generator.init_args.base_url` | 本地 ComfyUI 图像服务地址；示例使用 FLUX.2 klein |
-| `video_generator.init_args.base_url` | 本地 ComfyUI H3 视频服务地址 |
-| `video_generator.init_args.workflow_path` | 本机 H3 API 工作流 JSON 的实际路径 |
-
-保留 `local_only: true`，并使用回环地址。示例中的 `/path/to/workflow-api.json` 是必须替换的占位路径。
-
-服务准备好后运行：
-
-```sh
-.venv/bin/python main_serial_demo.py \
-  --config configs/serial_demo_local_h3.yaml \
-  --script-file examples/serial_demo_three_shot.txt \
-  --user-requirement-file examples/serial_demo_three_shot_requirements.txt \
-  --style "3D CGI animation" \
-  --output .working_dir/serial_demo
-```
-
-产物写入 `.working_dir/serial_demo/`，时间轴检查点位于 `continuity/timeline.json`。成功结束时，命令输出拼接视频的路径。
-
-恢复同一任务时使用原配置、风格和输出目录，增加 `--resume`，不再传剧本或制作要求：
-
-```sh
-.venv/bin/python main_serial_demo.py \
-  --config configs/serial_demo_local_h3.yaml \
-  --style "3D CGI animation" \
-  --resume \
-  --output .working_dir/serial_demo
-```
-
-## 使用 Web 或终端界面
-
-先按上文准备串行配置，再创建交互配置：
-
-```sh
-cp configs/agent.example.yaml configs/agent.local.yaml
-```
-
-`agent.local.yaml` 的 `serial.config` 指向同一份串行 YAML，默认是 `configs/serial_demo_local_h3.yaml`；也可用 `HMS_WORLD_SERIAL_CONFIG` 指定。对话默认复用其中的 `chat_model`，需要单独的对话模型时再填写 `llm` 覆盖项。图像、视频和连续性岗位均使用串行 YAML。
-
-界面先生成文本计划供审阅，再按用户请求渲染。每个会话的串行产物位于 `.working_dir/<session_id>/serial/`；继续渲染会从 Timeline 恢复。修改计划会创建新会话，保留原计划与媒体。旧 Idea/Novel/Script 会话仍可查看；要重新制作，请新建串行会话并提供确认后的故事文本。
-
-启动 Web：
-
-```sh
-npm --prefix web ci
-./hms-world web
-```
-
-默认访问 `http://127.0.0.1:4173`。界面支持项目会话、文件上传、产物与分镜预览、渲染进度和串行配置，详见 [Web 使用说明](web/README.md)。
-
-启动 TUI：
-
-```sh
-npm --prefix ui ci
-./hms-world tui
-# 新建会话
-./hms-world tui new
-# 恢复指定会话
-./hms-world tui resume <session_id>
-```
-
-## 验证与评测
-
-无需调用模型即可检查内置评测数据：
-
-```sh
-.venv/bin/python evals/vimax/runner.py --list
-.venv/bin/python evals/vimax/runner.py 29 --validate-only
-```
-
-实际生成、续跑和评分见 [评测说明](evals/README.md)。ViCLIP 评分需要单独准备模型与运行环境。
-
-开发检查按改动范围选择执行：
-
-```sh
-.venv/bin/python -m pytest -q
-npm --prefix web test
-npm --prefix web run build
-npm --prefix ui test
-```
-
-更多开发检查与依赖说明见[开发与验证](docs/development.md)。本地配置、凭据、依赖目录与 `.working_dir/` 产物由共享 `.gitignore` 管理；本地配置请使用上文给出的已忽略文件名。
-
-## TODO
+## 📋 TODO
 
 以下区分已实现能力与后续研究方向；未勾选条目表示待完成工作。
 
@@ -286,7 +335,9 @@ npm --prefix ui test
 - [ ] 扩展面向更长叙事的历史检索与索引。
 - [ ] 探索自动重拍与多镜头联合重规划。
 
-## 局限性
+<a id="limitations"></a>
+
+## 📝 局限性
 
 - **观察可靠性**：Observer 可能误读画面，稀疏采样可能遗漏短时变化。字段来源支持状态追溯，状态准确性仍取决于视觉观察。
 - **生成可控性**：参考图与结构化状态无法保证生成模型严格遵循约束，人物重复、空间关系错误及历史构图干扰仍可能出现。
@@ -294,8 +345,16 @@ npm --prefix ui test
 - **规划范围**：Replanner 仅作用于下一镜，当前不支持自动重拍或多镜连锁改写。
 - **实验覆盖**：历史开发干预、部分 baseline 及缺少重复实验限制了结果的归因与泛化，后续仍需同条件完整评测及针对动作、状态和叙事的独立评价。
 
-## 致谢与许可
+<a id="acknowledgments"></a>
+
+## 👍 致谢
 
 hms-world 基于 [HKUDS/ViMax](https://github.com/HKUDS/ViMax) 继续开发，沿用其角色图、分镜、机位转场和单镜制作能力，并保留对应的上游来源说明。本项目的主要扩展为串行视觉观察、世界状态记忆、历史材料选择与下一镜重规划。
 
-代码采用 [MIT License](LICENSE)，保留原始许可声明。感谢上游项目及相关开源模型与工具的贡献。
+感谢上游项目及相关开源模型与工具的贡献。
+
+<a id="license"></a>
+
+## 📄 许可
+
+代码采用 [MIT License](LICENSE)，保留原始许可声明。
