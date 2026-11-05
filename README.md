@@ -2,7 +2,7 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md) · [Documentation](docs/README.md)
 
-**World memory for multi-shot video generation.** hms-world observes generated footage, maintains structured world state, and uses that memory to guide visual reference selection, keyframe prompting, and next-shot replanning.
+**World memory for multi-shot video generation.** hms-world initializes structured world memory from entity designs, updates it through observations of generated footage, and uses that memory to guide visual reference selection, keyframe prompting, and next-shot replanning.
 
 [News](#news) · [Highlights](#highlights) · [Overview](#overview) · [Core Codes](#core-codes) · [Quick Start](#quick-start) · [Results](#benchmark-results) · [TODO](#todo)
 
@@ -37,7 +37,7 @@
   </a>
 </p>
 
-> **TLDR:** hms-world builds world memory from generated footage and carries observed state into subsequent shots through reference selection, keyframe prompts, and local replanning.
+> **TLDR:** hms-world initializes world memory from entity designs and updates it from generated footage, carrying accumulated state into subsequent shots through reference selection, keyframe prompts, and local replanning.
 
 [Full-size figure](docs/assets/world-memory-loop.svg) · [System architecture](docs/diagrams.md#system-architecture) · [Continuity documentation](docs/continuity.md)
 
@@ -57,13 +57,13 @@ https://github.com/user-attachments/assets/e0079784-4056-43c4-aa20-bb1d985bc648
 
 ### 1. Entity state and a unified timeline
 
-The entity registry assigns stable IDs to characters, props, and scenes. The Timeline organizes shots in story order: pending positions contain plans, while observed positions contain complete snapshots of accumulated known state. Before executing a shot, the system projects prior known state onto its participating entities.
+The entity registry assigns stable IDs and initial state to characters, props, and scenes. The Timeline organizes shots in story order: pending positions contain plans, while observed positions contain complete snapshots that combine initial state, prior memory, and new observations. Before executing a shot, the system projects prior known state onto its participating entities.
 
 Character state includes outfit, expression, emotion, pose, position, orientation, and held registered props. Prop state includes position and physical condition; scene state records visible layout and changes. Camera state belongs to the current shot and is not inherited by the next shot.
 
 ### 2. Visual observation and sparse state merging
 
-The Observer reads a 3×4 board of entity references and temporal samples, with up to two optional rounds of original-size sample inspection. It reports observed state at the last sampled moment, restricted to the current shot's participants. The Observer does not receive the action plan; the Replanner performs the subsequent comparison of planned and observed outcomes.
+The Observer reads a 3×4 board of entity references and temporal samples, with up to two optional rounds of original-size sample inspection. It reports observed state at the last sampled moment, restricted to the current shot's participants. The Observer does not receive the action plan; the Replanner subsequently assesses whether the observed outcome allows the next shot to fulfill its narrative task and form a coherent cut.
 
 | Update | Merge semantics |
 | --- | --- |
@@ -84,7 +84,7 @@ Provenance identifies a source shot. Whether a particular sample supports a fiel
 
 ### 4. Next-shot replanning from observed outcomes
 
-The Replanner receives the previous shot's script, complete merged known state, its last actual sampled frame, and the next shot's plan and camera constraints. It returns `NoChange` or `Replacement`, with changes restricted to the next shot. A revised plan follows the same reference selection, generation, and observation process.
+The Replanner receives the previous shot's script, complete merged known state, its last actual sampled frame, and the next shot's plan and camera constraints. It assesses whether the next shot can still fulfill its narrative task and form a coherent cut, allowing off-screen action, ellipsis, montage, and planned scene changes. It returns `NoChange` when the next plan remains usable, and `Replacement` only when concrete evidence shows a conflict that prevents its narrative task or makes the cut misleading. Revisions make the smallest coherent adjustment within the supplied camera constraints and affect only the next shot, which then follows the same reference selection, generation, and observation process.
 
 See [continuity state and visual materials](docs/continuity.md) for state models, provenance, selection, and recovery semantics.
 
@@ -282,7 +282,7 @@ All metrics exclude self-pairs. Scores are computed per story and then averaged 
 
 ### Complete historical development run
 
-The following results were scored on **October 20–22, 2026**. This development run included external visual review before each shot video, retries, prompt and code adjustments, and some case restarts. Image generation migrated from Qwen to FLUX during the run, retaining completed outputs. The table describes that historical development process; the current code and default configuration have not been rerun across all 35 stories.
+The following results were scored on **October 20–22, 2026**. First-frame quality control was applied across all benchmark cases solely to address duplicated characters and reduce their impact on subsequent generation and evaluation.
 
 | Group | Stories | IC ↑ | CC ↑ | GC ↑ |
 | --- | ---: | ---: | ---: | ---: |
