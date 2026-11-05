@@ -1,0 +1,25 @@
+[project]
+name = "hms-world"
+version = "1.2.0"
+description = "Video generation with serial visual continuity, next-shot replanning, and interactive workflows"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.12.14",
+    "langchain>=0.3.26",
+    "langchain-openai>=0.3.27",
+    "moviepy>=2.2.1",
+    "openai>=1.95.0",
+    "opencv-python",
+    "pillow>=11.3.0",
+    "pyyaml>=6.0.2",
+    "requests>=2.32.4",
+    "scenedetect[opencv]>=0.6.7.1",
+    "tenacity>=9.1.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]

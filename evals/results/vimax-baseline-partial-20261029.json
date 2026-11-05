@@ -1,0 +1,184 @@
+{
+  "benchmark": "ViMax-Bench",
+  "run_id": "native-h1003-20261029",
+  "status": "partial",
+  "completed_cases": 4,
+  "total_cases": 35,
+  "total_shots": 42,
+  "case_ids": [
+    1,
+    13,
+    17,
+    19
+  ],
+  "score_date_range_utc": [
+    "2026-10-29T08:09:32.598722+00:00",
+    "2026-10-29T09:51:05.739275+00:00"
+  ],
+  "aggregation": "Arithmetic mean of per-story scores over the four completed stories",
+  "baseline": {
+    "name": "ViMax native pipeline with local model adapters",
+    "upstream_commit": "fd4b72e7731be6e5f88486206d25ea59849b0285",
+    "input_protocol": "Official story overview and numbered first_frame/video_prompt pairs supplied to native planning",
+    "observer": false,
+    "replanner": false,
+    "chat_model": "qwen3-vl-30b-a3b",
+    "image_model": "ComfyUI FLUX.2 klein 9B Base (50 steps, cfg 4.0)",
+    "video_backend": "ComfyUI H3",
+    "style": "realistic live action",
+    "native_image_candidates": 2,
+    "review_scope": "extra_people_or_objects_only",
+    "native_public_retry_timeout_seconds": 1800
+  },
+  "scoring": {
+    "model": "ViCLIP-L-14 / InternVid-10M-FLT",
+    "sampling": "Official frames2tensor: 8 frames, floor-stride from frame zero, resize to 224x224, RGB ImageNet normalization",
+    "scene_grouping": "Original benchmark_input.json scene_num; generation registry scenes are not used",
+    "device": "mps",
+    "dtype": "float32"
+  },
+  "baseline_groups": {
+    "Overall": {
+      "cases": 4,
+      "IC": 0.679815165290256,
+      "CC": 0.681156224105029,
+      "GC": 0.680742842389249
+    },
+    "Type A": {
+      "cases": 1,
+      "IC": 0.5695492465732422,
+      "CC": 0.6024587308952496,
+      "GC": 0.588354666185818
+    },
+    "Type B": {
+      "cases": 3,
+      "IC": 0.7165704715292606,
+      "CC": 0.707388721841622,
+      "GC": 0.711538901123726
+    },
+    "Type C": {
+      "cases": 0,
+      "IC": null,
+      "CC": null,
+      "GC": null
+    }
+  },
+  "matched_comparison": {
+    "case_ids": [
+      1,
+      13,
+      17,
+      19
+    ],
+    "baseline": {
+      "IC": 0.679815165290256,
+      "CC": 0.681156224105029,
+      "GC": 0.680742842389249
+    },
+    "hms_world": {
+      "IC": 0.6888397066792844,
+      "CC": 0.695143020530652,
+      "GC": 0.6926846707498402
+    },
+    "hms_world_source": "vimax-bench-20261022.json",
+    "scope": "Same story IDs and scoring definitions, using each pipeline's historical outputs. Not a controlled single-variable ablation or a full-benchmark comparison."
+  },
+  "cases": [
+    {
+      "id": 1,
+      "theme": "chef_international_kitchens",
+      "type": "Type A",
+      "scene_count": 2,
+      "shot_count": 8,
+      "source_file": "chef_international_kitchens_typeA.json",
+      "baseline_scores": {
+        "IC": 0.5695492465732422,
+        "CC": 0.6024587308952496,
+        "GC": 0.588354666185818,
+        "intra_scene_pairs": 12,
+        "cross_scene_pairs": 16,
+        "all_pairs": 28
+      },
+      "hms_world_scores": {
+        "IC": 0.5649174359256878,
+        "CC": 0.5920845037618274,
+        "GC": 0.5804414746891962,
+        "intra_scene_pairs": 12,
+        "cross_scene_pairs": 16,
+        "all_pairs": 28
+      }
+    },
+    {
+      "id": 13,
+      "theme": "investigation_antique_bookshop",
+      "type": "Type B",
+      "scene_count": 2,
+      "shot_count": 10,
+      "source_file": "investigation_antique_bookshop_typeB.json",
+      "baseline_scores": {
+        "IC": 0.7468524921693129,
+        "CC": 0.7208656432592906,
+        "GC": 0.7324153538859671,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      },
+      "hms_world_scores": {
+        "IC": 0.7537421540573621,
+        "CC": 0.728404749115005,
+        "GC": 0.7396658179782746,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      }
+    },
+    {
+      "id": 17,
+      "theme": "family_gathering_victorian_mansion",
+      "type": "Type B",
+      "scene_count": 3,
+      "shot_count": 14,
+      "source_file": "family_gathering_victorian_mansion_typeB.json",
+      "baseline_scores": {
+        "IC": 0.6784214307641091,
+        "CC": 0.6797331218197098,
+        "GC": 0.679358352946681,
+        "intra_scene_pairs": 26,
+        "cross_scene_pairs": 65,
+        "all_pairs": 91
+      },
+      "hms_world_scores": {
+        "IC": 0.7201784260862486,
+        "CC": 0.7261084199614979,
+        "GC": 0.7244141359971409,
+        "intra_scene_pairs": 26,
+        "cross_scene_pairs": 65,
+        "all_pairs": 91
+      }
+    },
+    {
+      "id": 19,
+      "theme": "science_demo_university_lab",
+      "type": "Type B",
+      "scene_count": 2,
+      "shot_count": 10,
+      "source_file": "science_demo_university_lab_typeB.json",
+      "baseline_scores": {
+        "IC": 0.7244374916543597,
+        "CC": 0.721567400445866,
+        "GC": 0.7228429965385298,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      },
+      "hms_world_scores": {
+        "IC": 0.7165208106478389,
+        "CC": 0.7339744092842779,
+        "GC": 0.7262172543347494,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+# Local inference: Qwen3-VL chat, ComfyUI FLUX.2 klein images, and ComfyUI H3 video.
+local_only: true
+chat_model:
+  init_args:
+    model: qwen3-vl-30b-a3b
+    model_provider: openai
+    base_url: http://127.0.0.1:18936/v1
+    api_key: local
+    temperature: 0.7
+    top_p: 0.8
+    max_tokens: 8192
+    timeout: 300
+image_generator:
+  class_path: tools.image_generator_comfy_flux.ImageGeneratorComfyFlux
+  init_args:
+    base_url: http://127.0.0.1:18184
+    api_key: local
+    steps: 50
+    cfg: 4.0
+    receipt_dir: .working_dir/image_tasks
+video_generator:
+  class_path: tools.video_generator_comfy_h3.VideoGeneratorComfyH3
+  init_args:
+    base_url: http://127.0.0.1:18185
+    api_key: local
+    workflow_path: /path/to/workflow-api.json
+working_dir: .working_dir/serial_demo_all_local
+continuity:
+  enabled: true
+  serial: true
+  max_reference_images: 8

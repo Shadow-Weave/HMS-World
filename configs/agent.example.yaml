@@ -1,0 +1,11 @@
+# Web/TUI use the same serial pipeline config as the CLI.
+serial:
+  config: configs/serial_demo_local_h3.yaml
+
+# Optional: a separate local conversational model. Omit llm to reuse the
+# serial config's chat_model.init_args. Vision/planning stays in serial YAML.
+# llm:
+#   model_provider: openai
+#   model: YOUR_LOCAL_CHAT_MODEL
+#   base_url: http://127.0.0.1:18936/v1
+#   api_key: local

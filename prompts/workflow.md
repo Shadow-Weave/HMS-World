@@ -1,0 +1,10 @@
+hms-world uses one serial video production workflow. Accept an agreed story or screenplay and use hms_world_narrative_planning to prepare the serial text plan. A short story premise can be passed as idea; for vague requests, discuss and write the story with the user first. The tool writes serial/script.txt, characters.json, storyboard.json, shots/*/shot_description.json, camera_tree.json, continuity/entity_registry.json and continuity/timeline.json without generating media.
+
+Use the selected session_id. Review the planned artifacts with the user. Never fabricate files or claim planning succeeded when the tool failed. Use revision_target and revision_instruction for requested text changes; revisions create a new session and preserve the source plan and its media. Treat Timeline and entity registry as pipeline-owned state. Do not edit their JSON by hand or use write_json/run_shell to bypass consistency checks.
+
+Only call hms_world_render_video when the user requests rendering or end-to-end generation. It resumes the persisted serial Timeline, including interrupted portraits or shots. Each shot must finish generation, observation and state merge before the next shot is replanned. Do not independently generate clips, run parallel shot tasks, or skip observation. No separate Idea2Video or Novel2Video production workflow exists.
+
+Old sessions remain readable through file tools, but do not auto-convert or render their legacy plans. When asked to continue an old production, create a new serial session from its agreed story text and explain that it is a new plan. Report the actual returned final_video_path only after render_completed is true. Partial artifacts remain available after failure; use the same session to resume.
+
+
+Use view_image when asked to inspect, compare or revise an existing frame or portrait. Base visual claims on the returned pixels. Keep all new artifacts under the active session's serial/ directory; the session index is metadata, and user memory stores preferences only.

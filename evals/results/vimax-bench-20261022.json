@@ -1,0 +1,648 @@
+{
+  "benchmark": "ViMax-Bench",
+  "run_id": "full-bench-local-gpu567-20261020",
+  "result_kind": "Historical development run with external visual review, retries and an image-model migration",
+  "status": "complete",
+  "completed_cases": 35,
+  "total_cases": 35,
+  "total_shots": 437,
+  "score_date_range_utc": [
+    "2026-10-20T04:07:25.325254+00:00",
+    "2026-10-22T06:53:03.560699+00:00"
+  ],
+  "aggregation": "Arithmetic mean of per-story scores; each story has equal weight",
+  "generation": {
+    "style": "realistic live action",
+    "chat_model": "qwen3-vl-30b-a3b",
+    "image_models": [
+      "ComfyUI Qwen standard (25 steps)",
+      "ComfyUI FLUX.2 klein 9B Base (50 steps, cfg 4.0)"
+    ],
+    "image_model_policy": "Migrated from Qwen to FLUX during the run; retained completed outputs. This is not a homogeneous FLUX run.",
+    "video_backend": "ComfyUI H3",
+    "review_policy": "Actual external visual review before every shot video",
+    "interventions": "Development-time review, retries, prompt/code adjustments and case restarts; not an unattended single-pass run.",
+    "generation_revision": null
+  },
+  "scoring": {
+    "model": "ViCLIP-L-14 / InternVid-10M-FLT",
+    "source_repo": "OpenGVLab/InternVideo",
+    "source_revision": "3965eef16e2dadd0ea6c8d0cc29c8a3039df52e3",
+    "weights_sha256": "7a4d6ad6eac6632db3693f4b97f9f8f6445b65b1e139a6fc6686150522238c56",
+    "sampling": "Official frames2tensor: 8 frames, floor-stride from frame zero, resize to 224x224, RGB ImageNet normalization",
+    "scene_grouping": "Original benchmark_input.json scene_num; generation registry scenes are not used",
+    "device": "mps",
+    "dtype": "float32",
+    "metrics": {
+      "IC": "Mean cosine similarity of distinct shot pairs within the same official scene_num",
+      "CC": "Mean cosine similarity of distinct shot pairs across different official scene_num groups",
+      "GC": "Mean cosine similarity of all distinct shot pairs"
+    }
+  },
+  "limitations": [
+    "Historical scores predate the current cleanup and default configuration; current HEAD has not been rerun on all 35 stories.",
+    "No matched complete 35-story baseline or repeated-seed confidence intervals are reported.",
+    "Similarity scores do not directly measure action completion or physical state correctness.",
+    "This public export contains aggregate and per-story scores, not the original videos or full run logs."
+  ],
+  "groups": {
+    "Overall": {
+      "cases": 35,
+      "IC": 0.6263766874940278,
+      "CC": 0.6074592965651537,
+      "GC": 0.6131736329369932
+    },
+    "Medium": {
+      "cases": 12,
+      "IC": 0.6373666338048838,
+      "CC": 0.6129699891973593,
+      "GC": 0.6238056055630475
+    },
+    "Long": {
+      "cases": 23,
+      "IC": 0.6206428024622769,
+      "CC": 0.6045841525831332,
+      "GC": 0.6076265167842692
+    },
+    "Type A": {
+      "cases": 12,
+      "IC": 0.5076712464756621,
+      "CC": 0.48534817754887283,
+      "GC": 0.49016230853735454
+    },
+    "Type B": {
+      "cases": 12,
+      "IC": 0.7135038253187586,
+      "CC": 0.7151902145300143,
+      "GC": 0.7152246264269074
+    },
+    "Type C": {
+      "cases": 11,
+      "IC": 0.6608257455234476,
+      "CC": 0.6231467886212484,
+      "GC": 0.6360394484748744
+    }
+  },
+  "cases": [
+    {
+      "id": 1,
+      "theme": "chef_international_kitchens",
+      "type": "Type A",
+      "scene_count": 2,
+      "shot_count": 8,
+      "source_file": "chef_international_kitchens_typeA.json",
+      "scores": {
+        "IC": 0.5649174359256878,
+        "CC": 0.5920845037618274,
+        "GC": 0.5804414746891962,
+        "intra_scene_pairs": 12,
+        "cross_scene_pairs": 16,
+        "all_pairs": 28
+      }
+    },
+    {
+      "id": 2,
+      "theme": "artist_extreme_weather",
+      "type": "Type A",
+      "scene_count": 3,
+      "shot_count": 12,
+      "source_file": "artist_extreme_weather_typeA.json",
+      "scores": {
+        "IC": 0.5998002389826237,
+        "CC": 0.5347114022083259,
+        "GC": 0.5524629031467708,
+        "intra_scene_pairs": 18,
+        "cross_scene_pairs": 48,
+        "all_pairs": 66
+      }
+    },
+    {
+      "id": 3,
+      "theme": "musician_cultural_venues",
+      "type": "Type A",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "musician_cultural_venues_typeA.json",
+      "scores": {
+        "IC": 0.5940087653405923,
+        "CC": 0.5720690442208051,
+        "GC": 0.5764569884447626,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 4,
+      "theme": "photographer_urban_timelapses",
+      "type": "Type A",
+      "scene_count": 2,
+      "shot_count": 8,
+      "source_file": "photographer_urban_timelapses_typeA.json",
+      "scores": {
+        "IC": 0.5581090765979272,
+        "CC": 0.4991047218273081,
+        "GC": 0.5243923024432877,
+        "intra_scene_pairs": 12,
+        "cross_scene_pairs": 16,
+        "all_pairs": 28
+      }
+    },
+    {
+      "id": 5,
+      "theme": "scientist_natural_environments",
+      "type": "Type A",
+      "scene_count": 3,
+      "shot_count": 12,
+      "source_file": "scientist_natural_environments_typeA.json",
+      "scores": {
+        "IC": 0.4363974151605889,
+        "CC": 0.47206884824948414,
+        "GC": 0.46234027558887636,
+        "intra_scene_pairs": 18,
+        "cross_scene_pairs": 48,
+        "all_pairs": 66
+      }
+    },
+    {
+      "id": 6,
+      "theme": "writer_contrasting_locations",
+      "type": "Type A",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "writer_contrasting_locations_typeA.json",
+      "scores": {
+        "IC": 0.5503808510618381,
+        "CC": 0.453091089324926,
+        "GC": 0.4725490416723083,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 7,
+      "theme": "dancer_architectural_spaces",
+      "type": "Type A",
+      "scene_count": 2,
+      "shot_count": 8,
+      "source_file": "dancer_architectural_spaces_typeA.json",
+      "scores": {
+        "IC": 0.4045921888514912,
+        "CC": 0.41392771659149774,
+        "GC": 0.409926776131495,
+        "intra_scene_pairs": 12,
+        "cross_scene_pairs": 16,
+        "all_pairs": 28
+      }
+    },
+    {
+      "id": 8,
+      "theme": "gardener_four_seasons",
+      "type": "Type A",
+      "scene_count": 3,
+      "shot_count": 12,
+      "source_file": "gardener_four_seasons_typeA.json",
+      "scores": {
+        "IC": 0.43693306629170603,
+        "CC": 0.43833745416364317,
+        "GC": 0.43795443928947847,
+        "intra_scene_pairs": 18,
+        "cross_scene_pairs": 48,
+        "all_pairs": 66
+      }
+    },
+    {
+      "id": 9,
+      "theme": "athlete_training_conditions",
+      "type": "Type A",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "athlete_training_conditions_typeA.json",
+      "scores": {
+        "IC": 0.5513753955020841,
+        "CC": 0.4611276218437202,
+        "GC": 0.479177176575393,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 10,
+      "theme": "barista_coffee_cultures",
+      "type": "Type A",
+      "scene_count": 2,
+      "shot_count": 8,
+      "source_file": "barista_coffee_cultures_typeA.json",
+      "scores": {
+        "IC": 0.46355802744413466,
+        "CC": 0.48051317097069857,
+        "GC": 0.47324668088788535,
+        "intra_scene_pairs": 12,
+        "cross_scene_pairs": 16,
+        "all_pairs": 28
+      }
+    },
+    {
+      "id": 11,
+      "theme": "filmmaker_lighting_setups",
+      "type": "Type A",
+      "scene_count": 3,
+      "shot_count": 12,
+      "source_file": "filmmaker_lighting_setups_typeA.json",
+      "scores": {
+        "IC": 0.5178646520231397,
+        "CC": 0.5056395499917392,
+        "GC": 0.5089736687275757,
+        "intra_scene_pairs": 18,
+        "cross_scene_pairs": 48,
+        "all_pairs": 66
+      }
+    },
+    {
+      "id": 12,
+      "theme": "fashion_model_runway_styles",
+      "type": "Type A",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "fashion_model_runway_styles_typeA.json",
+      "scores": {
+        "IC": 0.41411784452613176,
+        "CC": 0.40150300743249884,
+        "GC": 0.40402597485122554,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 13,
+      "theme": "investigation_antique_bookshop",
+      "type": "Type B",
+      "scene_count": 2,
+      "shot_count": 10,
+      "source_file": "investigation_antique_bookshop_typeB.json",
+      "scores": {
+        "IC": 0.7537421540573621,
+        "CC": 0.728404749115005,
+        "GC": 0.7396658179782746,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      }
+    },
+    {
+      "id": 14,
+      "theme": "cooking_competition_restaurant",
+      "type": "Type B",
+      "scene_count": 3,
+      "shot_count": 14,
+      "source_file": "cooking_competition_restaurant_typeB.json",
+      "scores": {
+        "IC": 0.6533571326263525,
+        "CC": 0.6771811092175257,
+        "GC": 0.6703742587629047,
+        "intra_scene_pairs": 26,
+        "cross_scene_pairs": 65,
+        "all_pairs": 91
+      }
+    },
+    {
+      "id": 15,
+      "theme": "puzzle_solving_escape_room",
+      "type": "Type B",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "puzzle_solving_escape_room_typeB.json",
+      "scores": {
+        "IC": 0.5733266820920871,
+        "CC": 0.5837949839365301,
+        "GC": 0.5817013235676415,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 16,
+      "theme": "fashion_shoot_art_gallery",
+      "type": "Type B",
+      "scene_count": 2,
+      "shot_count": 10,
+      "source_file": "fashion_shoot_art_gallery_typeB.json",
+      "scores": {
+        "IC": 0.7312196011974126,
+        "CC": 0.73214187609492,
+        "GC": 0.7317319761404723,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      }
+    },
+    {
+      "id": 17,
+      "theme": "family_gathering_victorian_mansion",
+      "type": "Type B",
+      "scene_count": 3,
+      "shot_count": 14,
+      "source_file": "family_gathering_victorian_mansion_typeB.json",
+      "scores": {
+        "IC": 0.7201784260862486,
+        "CC": 0.7261084199614979,
+        "GC": 0.7244141359971409,
+        "intra_scene_pairs": 26,
+        "cross_scene_pairs": 65,
+        "all_pairs": 91
+      }
+    },
+    {
+      "id": 18,
+      "theme": "theater_rehearsal_community_stage",
+      "type": "Type B",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "theater_rehearsal_community_stage_typeB.json",
+      "scores": {
+        "IC": 0.7369505257423484,
+        "CC": 0.7510735818397477,
+        "GC": 0.7482489706202679,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 19,
+      "theme": "science_demo_university_lab",
+      "type": "Type B",
+      "scene_count": 2,
+      "shot_count": 10,
+      "source_file": "science_demo_university_lab_typeB.json",
+      "scores": {
+        "IC": 0.7165208106478389,
+        "CC": 0.7339744092842779,
+        "GC": 0.7262172543347494,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      }
+    },
+    {
+      "id": 20,
+      "theme": "meditation_class_zen_temple",
+      "type": "Type B",
+      "scene_count": 3,
+      "shot_count": 14,
+      "source_file": "meditation_class_zen_temple_typeB.json",
+      "scores": {
+        "IC": 0.660055275498887,
+        "CC": 0.6637144938113608,
+        "GC": 0.6626690028649398,
+        "intra_scene_pairs": 26,
+        "cross_scene_pairs": 65,
+        "all_pairs": 91
+      }
+    },
+    {
+      "id": 21,
+      "theme": "wine_tasting_cellar_venue",
+      "type": "Type B",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "wine_tasting_cellar_venue_typeB.json",
+      "scores": {
+        "IC": 0.7879783507765898,
+        "CC": 0.8026284372021433,
+        "GC": 0.7996984199170326,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 22,
+      "theme": "pottery_workshop_studio_space",
+      "type": "Type B",
+      "scene_count": 2,
+      "shot_count": 10,
+      "source_file": "pottery_workshop_studio_space_typeB.json",
+      "scores": {
+        "IC": 0.7301836396025496,
+        "CC": 0.7062479368745334,
+        "GC": 0.7168860269758739,
+        "intra_scene_pairs": 20,
+        "cross_scene_pairs": 25,
+        "all_pairs": 45
+      }
+    },
+    {
+      "id": 23,
+      "theme": "music_recording_home_studio",
+      "type": "Type B",
+      "scene_count": 3,
+      "shot_count": 14,
+      "source_file": "music_recording_home_studio_typeB.json",
+      "scores": {
+        "IC": 0.7801809095947763,
+        "CC": 0.7828454917247433,
+        "GC": 0.7820841825447529,
+        "intra_scene_pairs": 26,
+        "cross_scene_pairs": 65,
+        "all_pairs": 91
+      }
+    },
+    {
+      "id": 24,
+      "theme": "board_game_cafe_interior",
+      "type": "Type B",
+      "scene_count": 4,
+      "shot_count": 16,
+      "source_file": "board_game_cafe_interior_typeB.json",
+      "scores": {
+        "IC": 0.71835239590265,
+        "CC": 0.6941670852978864,
+        "GC": 0.699004147418839,
+        "intra_scene_pairs": 24,
+        "cross_scene_pairs": 96,
+        "all_pairs": 120
+      }
+    },
+    {
+      "id": 25,
+      "theme": "business_partners_office_negotiation",
+      "type": "Type C",
+      "scene_count": 2,
+      "shot_count": 9,
+      "source_file": "business_partners_office_negotiation_typeC.json",
+      "scores": {
+        "IC": 0.6902276630416544,
+        "CC": 0.6992814315747866,
+        "GC": 0.69525753444895,
+        "intra_scene_pairs": 16,
+        "cross_scene_pairs": 20,
+        "all_pairs": 36
+      }
+    },
+    {
+      "id": 26,
+      "theme": "mentor_student_craft_learning",
+      "type": "Type C",
+      "scene_count": 3,
+      "shot_count": 13,
+      "source_file": "mentor_student_craft_learning_typeC.json",
+      "scores": {
+        "IC": 0.7710034208403118,
+        "CC": 0.759933347492783,
+        "GC": 0.7630556758728552,
+        "intra_scene_pairs": 22,
+        "cross_scene_pairs": 56,
+        "all_pairs": 78
+      }
+    },
+    {
+      "id": 27,
+      "theme": "three_friends_surprise_planning",
+      "type": "Type C",
+      "scene_count": 4,
+      "shot_count": 15,
+      "source_file": "three_friends_surprise_planning_typeC.json",
+      "scores": {
+        "IC": 0.5647274555396092,
+        "CC": 0.43147334871427095,
+        "GC": 0.45812417007933864,
+        "intra_scene_pairs": 21,
+        "cross_scene_pairs": 84,
+        "all_pairs": 105
+      }
+    },
+    {
+      "id": 28,
+      "theme": "couple_cooking_dinner_together",
+      "type": "Type C",
+      "scene_count": 2,
+      "shot_count": 9,
+      "source_file": "couple_cooking_dinner_together_typeC.json",
+      "scores": {
+        "IC": 0.6647458828152575,
+        "CC": 0.6862883890103679,
+        "GC": 0.6767139418125412,
+        "intra_scene_pairs": 16,
+        "cross_scene_pairs": 20,
+        "all_pairs": 36
+      }
+    },
+    {
+      "id": 29,
+      "theme": "scientists_lab_collaboration",
+      "type": "Type C",
+      "scene_count": 3,
+      "shot_count": 13,
+      "source_file": "scientists_lab_collaboration_typeC.json",
+      "scores": {
+        "IC": 0.5851102108667855,
+        "CC": 0.6191183717666865,
+        "GC": 0.6095263263846632,
+        "intra_scene_pairs": 22,
+        "cross_scene_pairs": 56,
+        "all_pairs": 78
+      }
+    },
+    {
+      "id": 30,
+      "theme": "teacher_student_tutoring_session",
+      "type": "Type C",
+      "scene_count": 4,
+      "shot_count": 15,
+      "source_file": "teacher_student_tutoring_session_typeC.json",
+      "scores": {
+        "IC": 0.677072864994068,
+        "CC": 0.6325956294461044,
+        "GC": 0.641491076555697,
+        "intra_scene_pairs": 21,
+        "cross_scene_pairs": 84,
+        "all_pairs": 105
+      }
+    },
+    {
+      "id": 31,
+      "theme": "athletes_gym_training_duo",
+      "type": "Type C",
+      "scene_count": 2,
+      "shot_count": 9,
+      "source_file": "athletes_gym_training_duo_typeC.json",
+      "scores": {
+        "IC": 0.7221919085562876,
+        "CC": 0.7064472268861555,
+        "GC": 0.7134448631839919,
+        "intra_scene_pairs": 16,
+        "cross_scene_pairs": 20,
+        "all_pairs": 36
+      }
+    },
+    {
+      "id": 32,
+      "theme": "detective_witness_interview",
+      "type": "Type C",
+      "scene_count": 3,
+      "shot_count": 13,
+      "source_file": "detective_witness_interview_typeC.json",
+      "scores": {
+        "IC": 0.4540611255770786,
+        "CC": 0.4783328418623675,
+        "GC": 0.4714869731665166,
+        "intra_scene_pairs": 22,
+        "cross_scene_pairs": 56,
+        "all_pairs": 78
+      }
+    },
+    {
+      "id": 33,
+      "theme": "colleagues_brainstorming_ideas",
+      "type": "Type C",
+      "scene_count": 4,
+      "shot_count": 15,
+      "source_file": "colleagues_brainstorming_ideas_typeC.json",
+      "scores": {
+        "IC": 0.705823290064936,
+        "CC": 0.679949429509603,
+        "GC": 0.6851242016206698,
+        "intra_scene_pairs": 21,
+        "cross_scene_pairs": 84,
+        "all_pairs": 105
+      }
+    },
+    {
+      "id": 34,
+      "theme": "siblings_organizing_family_event",
+      "type": "Type C",
+      "scene_count": 2,
+      "shot_count": 9,
+      "source_file": "siblings_organizing_family_event_typeC.json",
+      "scores": {
+        "IC": 0.648391216921002,
+        "CC": 0.3772237383769349,
+        "GC": 0.4977426177298535,
+        "intra_scene_pairs": 16,
+        "cross_scene_pairs": 20,
+        "all_pairs": 36
+      }
+    },
+    {
+      "id": 35,
+      "theme": "musicians_band_rehearsal",
+      "type": "Type C",
+      "scene_count": 3,
+      "shot_count": 13,
+      "source_file": "musicians_band_rehearsal_typeC.json",
+      "scores": {
+        "IC": 0.7857281615409335,
+        "CC": 0.7839709201936724,
+        "GC": 0.7844665523685411,
+        "intra_scene_pairs": 22,
+        "cross_scene_pairs": 56,
+        "all_pairs": 78
+      }
+    }
+  ]
+}

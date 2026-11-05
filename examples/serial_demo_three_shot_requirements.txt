@@ -1,0 +1,12 @@
+Create exactly three sequential shots as a flat 2D cel-shaded illustration with
+bold ink outlines, painted graphic textures, and clearly illustrated fictional
+characters; no photorealism or live action. Use realism only for acting and
+physical continuity.
+Shot 0 variation_type must be small: it is a same-composition close shot whose important ending change (the lantern
+turning blue) is described in motion_desc, not a separately produced last frame.
+Shot 1 variation_type must be medium or large; it must use a child camera or a new camera angle based on
+shot 0, and continue from the real lantern state. Shot 2 must continue shot 1 on
+the same camera, its variation_type must be medium or large, include Ivo entering with the lantern, and
+explicitly recall the photograph established in shot 0 so an earlier history image
+is useful. Let the director keep one unaffected next shot unchanged when plausible,
+but replace the next shot if the observed lantern state materially changes it.
