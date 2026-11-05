@@ -2,9 +2,10 @@
 
 | 文档 | 内容 |
 | --- | --- |
-| [项目 README](../README.md) / [English guide](../README.en.md) | 安装、配置、串行生成和恢复 |
+| [English README](../README.md) / [中文 README](../README.zh-CN.md) | 安装、配置、串行生成和恢复 |
 | [Web 工作区](../web/README.md) | 交互入口、配置与构建 |
 | [开发与验证](development.md) | 依赖安装与离线检查 |
+| [流程图 / Diagram guide](diagrams.md) | 生成闭环与系统架构的 SVG 图及说明 |
 | [串行生成架构](architecture.md) | 模块职责、执行顺序、产物与恢复 |
 | [连续性状态与视觉材料](continuity.md) | 稀疏观察、状态合并、字段来源与选图 |
 | [评测说明](../evals/README.md) | ViMax-Bench、批量生成与评分 |

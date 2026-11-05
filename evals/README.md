@@ -2,7 +2,7 @@
 
 ViMax-Bench 使用正式生产流水线，评测代码集中在此目录。应用代码不导入 evals。
 
-先按 [hms-world README](../README.md) 安装依赖并配置本地模型服务。以下命令从仓库根目录执行。当前串行配置为 `configs/serial_demo_local_h3.yaml`。
+先按 [hms-world README](../README.zh-CN.md) 安装依赖并配置本地模型服务。以下命令从仓库根目录执行。当前串行配置为 `configs/serial_demo_local_h3.yaml`。
 
 ## ViMax-Bench
 
@@ -40,7 +40,7 @@ ViMax-Bench 使用正式生产流水线，评测代码集中在此目录。应�
 
 2026-10-20 至 2026-10-22 评分的历史开发批次覆盖 35 个故事、437 个镜头。逐故事分数与分组均值保存在 [`results/vimax-bench-20261022.json`](results/vimax-bench-20261022.json)，总分按故事等权平均：IC **0.6264**、CC **0.6075**、GC **0.6132**。
 
-分数对应上述历史批次。项目最终模型配置为 Qwen3-VL-30B-A3B、FLUX.2 klein 9B Base 和 ComfyUI H3。指标定义、完整表格和配置参数见[项目 README](../README.md#benchmark-结果)。
+分数对应上述历史批次。项目当前示例模型配置为 Qwen3-VL-30B-A3B、FLUX.2 klein 9B Base 和 ComfyUI H3。指标定义、完整表格和配置参数见[项目 README](../README.zh-CN.md#benchmark-结果)。
 
 ViMax baseline 已完成案例 1、13、17、19，共 4/35 个故事、42 个镜头。部分结果为 IC **0.6798**、CC **0.6812**、GC **0.6807**；hms-world 在相同 4 个故事上的均值为 **0.6888 / 0.6951 / 0.6927**。逐故事分数、原生流程版本及对照范围见 [`results/vimax-baseline-partial-20261029.json`](results/vimax-baseline-partial-20261029.json)。部分 baseline 与 35 故事总分使用不同案例集合，应使用 README 中的同案例表进行比较。
 

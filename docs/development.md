@@ -39,7 +39,7 @@ npm --prefix ui test
 
 Python 套件覆盖公开接口、Provider、Agent 会话、制作与缓存、检查点恢复、Observer 补看、稀疏状态合并、历史来源、下一镜 Replan，以及 ViMax-Bench 入口与一致性评分。Web 测试同时覆盖浏览器侧逻辑和 Node 服务；TUI 测试覆盖行号映射、斜杠命令和工作区元数据。
 
-这些检查不调用真实模型生成或 ViCLIP 模型推理。需要实际生成或评测时，参阅 [hms-world README](../README.md) 和[评测说明](../evals/README.md)中的当前命令与配置。本地串行配置不使用旧网关配置或云端凭据。
+这些检查不调用真实模型生成或 ViCLIP 模型推理。需要实际生成或评测时，参阅 [中文 README](../README.zh-CN.md) 和[评测说明](../evals/README.md)中的当前命令与配置。本地串行配置不使用旧网关配置或云端凭据。
 
 ## Provider 与媒体依赖
 

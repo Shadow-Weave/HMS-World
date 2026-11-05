@@ -2,7 +2,7 @@
 
 hms-world 的浏览器工作区支持项目会话、Agent 对话、文件上传、产物与分镜预览、渲染进度和串行配置。前端通过 Agent Loop 与 JSONL 事件流调用串行流程，与 CLI 共用 Observer → Timeline → Replanner 闭环。
 
-项目安装、串行示例和功能边界见 [hms-world README](../README.md)。以下命令从仓库根目录执行。
+项目安装、串行示例和功能边界见 [中文 README](../README.zh-CN.md)。以下命令从仓库根目录执行。
 
 ## 安装与配置
 
